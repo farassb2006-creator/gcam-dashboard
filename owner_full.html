@@ -1,223 +1,127 @@
-<!DOCTYPE html>
-<html lang="ar">
-<head>
-  <meta charset="UTF-8">
-  <title>👑 لوحة تحكم المالك – GCAM Token Full Control</title>
-  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
-  <style>
-    body {
-      font-family: "Tahoma", sans-serif;
-      direction: rtl;
-      text-align: center;
-      background: linear-gradient(160deg, #fffbe6, #ffd700);
-      color: #333;
-      margin: 0;
-      padding: 20px;
+<script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+<script>
+  // ✅ عنوان الـ Proxy الصحيح
+  const contractAddress = "0xe5037f8A3B689c986f11d7c84B83be6E8a9199ff";
+
+  // ✅ ABI كامل (ERC20 + دوال GCAM V2 الخاصة)
+  const abi = [
+    {
+      "inputs": [],
+      "name": "name",
+      "outputs": [{ "internalType": "string", "name": "", "type": "string" }],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "symbol",
+      "outputs": [{ "internalType": "string", "name": "", "type": "string" }],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "decimals",
+      "outputs": [{ "internalType": "uint8", "name": "", "type": "uint8" }],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "totalSupply",
+      "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [{ "internalType": "address", "name": "account", "type": "address" }],
+      "name": "balanceOf",
+      "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [{ "internalType": "address", "name": "recipient", "type": "address" }, { "internalType": "uint256", "name": "amount", "type": "uint256" }],
+      "name": "transfer",
+      "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [{ "internalType": "address", "name": "spender", "type": "address" }, { "internalType": "uint256", "name": "amount", "type": "uint256" }],
+      "name": "approve",
+      "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [{ "internalType": "address", "name": "owner", "type": "address" }, { "internalType": "address", "name": "spender", "type": "address" }],
+      "name": "allowance",
+      "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+      "stateMutability": "view",
+      "type": "function"
+    },
+
+    // ✅ دوال GCAM V2 الخاصة
+    {
+      "inputs": [],
+      "name": "owner",
+      "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [{ "internalType": "uint256", "name": "amount", "type": "uint256" }],
+      "name": "burnFromContract",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [{ "internalType": "address", "name": "to", "type": "address" }, { "internalType": "uint256", "name": "amount", "type": "uint256" }],
+      "name": "transferFromContract",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "unlockAllFrozenTokens",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "startTrading",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [{ "internalType": "address", "name": "newImplementation", "type": "address" }, { "internalType": "bytes", "name": "data", "type": "bytes" }],
+      "name": "upgradeToAndCall",
+      "outputs": [],
+      "stateMutability": "payable",
+      "type": "function"
     }
-    h2 { color: #a57c00; margin-bottom: 10px; }
-    section {
-      background: #fffef5;
-      border-radius: 15px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-      margin: 20px auto;
-      padding: 20px;
-      max-width: 700px;
-    }
-    button {
-      background-color: #a57c00;
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 10px;
-      cursor: pointer;
-      font-size: 16px;
-      margin: 5px;
-    }
-    button:hover { background-color: #8a6500; }
-    input {
-      padding: 8px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      width: 250px;
-      margin: 5px;
-      text-align: center;
-    }
-    hr { margin: 25px 0; border: 0; height: 2px; background: #f1e17f; }
-    #unauthorized {
-      background: #fff3cd;
-      color: #856404;
-      border: 1px solid #ffeeba;
-      padding: 10px;
-      margin-top: 30px;
-      border-radius: 10px;
-      display: none;
-    }
-  </style>
-</head>
-<body>
+  ];
 
-  <h2>👑 لوحة تحكم GCAM – المالك الرسمي</h2>
-  <button id="connectBtn">🔗 ربط المحفظة</button>
-  <p id="walletAddress">لم يتم الاتصال بعد</p>
-  <div id="unauthorized">⚠️ هذه الصفحة خاصة بالمالك الرسمي فقط</div>
+  // ✅ مثال: ربط المحفظة والعقد
+  let provider, signer, contract;
 
-  <div id="adminPanel" style="display:none;">
+  async function connectWallet() {
+    if (!window.ethereum) return alert("يرجى تثبيت MetaMask أولاً!");
+    provider = new ethers.providers.Web3Provider(window.ethereum);
+    await provider.send("eth_requestAccounts", []);
+    signer = provider.getSigner();
+    contract = new ethers.Contract(contractAddress, abi, signer);
 
-    <!-- قسم المعلومات -->
-    <section>
-      <h3>📊 معلومات عامة</h3>
-      <p><b>الاسم:</b> <span id="name">—</span></p>
-      <p><b>الرمز:</b> <span id="symbol">—</span></p>
-      <p><b>الإجمالي:</b> <span id="totalSupply">—</span></p>
-      <p><b>المالك:</b> <span id="ownerAddr">—</span></p>
-      <p><b>الإصدار:</b> <span id="version">—</span></p>
-    </section>
+    const userAddress = await signer.getAddress();
+    console.log("📘 المحفظة المتصلة:", userAddress);
 
-    <!-- إدارة الرصيد -->
-    <section>
-      <h3>💰 أرصدة العقد</h3>
-      <p><b>GCAM:</b> <span id="gcamBalance">—</span></p>
-      <p><b>BNB:</b> <span id="bnbBalance">—</span></p>
-      <p>
-        🪙 عنوان عملة أخرى: <input id="tokenAddress" placeholder="مثلاً عقد USDT">
-        <button id="checkOther">عرض الرصيد</button>
-      </p>
-      <p><b>الرصيد:</b> <span id="otherTokenBal">—</span></p>
-    </section>
-
-    <!-- السحب -->
-    <section>
-      <h3>🏦 سحب الأرصدة</h3>
-      <input id="withdrawBNBamount" placeholder="كمية BNB" type="number">
-      <button id="withdrawBNB">سحب BNB</button>
-      <hr>
-      <input id="withdrawTokenAddress" placeholder="عنوان العملة ERC20">
-      <input id="withdrawTokenAmount" placeholder="الكمية">
-      <button id="withdrawToken">سحب العملة</button>
-    </section>
-
-    <!-- إدارة التوكن -->
-    <section>
-      <h3>⚙️ إدارة التوكن</h3>
-      <input id="burnAmount" placeholder="كمية الحرق">
-      <button id="burnBtn">🔥 حرق من العقد</button>
-      <hr>
-      <input id="toAddress" placeholder="عنوان المستلم">
-      <input id="sendAmount" placeholder="الكمية">
-      <button id="transferBtn">💸 إرسال من العقد</button>
-      <hr>
-      <button id="unlockBtn">🔓 فتح الرموز المجمدة</button>
-      <button id="startBtn">🚀 بدء التداول</button>
-    </section>
-
-    <!-- الترقية -->
-    <section>
-      <h3>🔧 ترقية العقد (Upgrade)</h3>
-      <input id="newImplementation" placeholder="عنوان العقد الجديد">
-      <button id="upgradeBtn">تحديث الكود</button>
-    </section>
-
-  </div>
-
-  <footer style="margin-top:40px;">© 2025 GCAM Token – لوحة المالك الكاملة</footer>
-
-  <script>
-    const contractAddress = "0xe5037f8A3B689c986f11d7c84B83be6E8a9199ff";
-    const OWNER_FIXED = "0x73276E027d85d8BEB7d3F3f9F17D3612Ce72fD79"; // ✅ المالك الرسمي الثابت
-    const abi = [
-      {"inputs":[],"name":"name","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},
-      {"inputs":[],"name":"symbol","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},
-      {"inputs":[],"name":"totalSupply","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
-      {"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},
-      {"inputs":[],"name":"version","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"pure","type":"function"},
-      {"inputs":[],"name":"decimals","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function"},
-      {"inputs":[{"internalType":"address","name":"account","type":"address"}],"name":"balanceOf","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
-      {"inputs":[{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"burnFromContract","outputs":[],"stateMutability":"nonpayable","type":"function"},
-      {"inputs":[{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"transferFromContract","outputs":[],"stateMutability":"nonpayable","type":"function"},
-      {"inputs":[],"name":"unlockAllFrozenTokens","outputs":[],"stateMutability":"nonpayable","type":"function"},
-      {"inputs":[],"name":"startTrading","outputs":[],"stateMutability":"nonpayable","type":"function"},
-      {"inputs":[{"internalType":"address","name":"newImplementation","type":"address"},{"internalType":"bytes","name":"data","type":"bytes"}],"name":"upgradeToAndCall","outputs":[],"stateMutability":"payable","type":"function"}
-    ];
-
-    let provider, signer, contract;
-
-    async function connectWallet() {
-      if (!window.ethereum) return alert("يرجى تثبيت MetaMask أولاً!");
-      provider = new ethers.providers.Web3Provider(window.ethereum);
-      await provider.send("eth_requestAccounts", []);
-      signer = provider.getSigner();
-      const userAddress = (await signer.getAddress()).toLowerCase();
-      contract = new ethers.Contract(contractAddress, abi, signer);
-
-      document.getElementById("walletAddress").innerText = `📘 المحفظة المتصلة: ${userAddress}`;
-
-      if (userAddress === OWNER_FIXED.toLowerCase()) {
-        document.getElementById("adminPanel").style.display = "block";
-        document.getElementById("unauthorized").style.display = "none";
-        loadInfo();
-      } else {
-        document.getElementById("unauthorized").style.display = "block";
-      }
-    }
-
-    async function loadInfo() {
-      const [name, symbol, total, version, decimals, ownerAddr, gcamBal, bnbBal] = await Promise.all([
-        contract.name(), contract.symbol(), contract.totalSupply(),
-        contract.version(), contract.decimals(), contract.owner(),
-        contract.balanceOf(contractAddress), provider.getBalance(contractAddress)
-      ]);
-      document.getElementById("name").innerText = name;
-      document.getElementById("symbol").innerText = symbol;
-      document.getElementById("ownerAddr").innerText = ownerAddr;
-      document.getElementById("version").innerText = version;
-      document.getElementById("totalSupply").innerText = ethers.utils.formatUnits(total, decimals);
-      document.getElementById("gcamBalance").innerText = ethers.utils.formatUnits(gcamBal, decimals);
-      document.getElementById("bnbBalance").innerText = ethers.utils.formatEther(bnbBal);
-    }
-
-    async function burn() {
-      const amt = document.getElementById("burnAmount").value;
-      const dec = await contract.decimals();
-      const tx = await contract.burnFromContract(ethers.utils.parseUnits(amt, dec));
-      await tx.wait(); alert("🔥 تم الحرق بنجاح!"); loadInfo();
-    }
-
-    async function transfer() {
-      const to = document.getElementById("toAddress").value;
-      const amt = document.getElementById("sendAmount").value;
-      const dec = await contract.decimals();
-      const tx = await contract.transferFromContract(to, ethers.utils.parseUnits(amt, dec));
-      await tx.wait(); alert("💸 تم الإرسال بنجاح!"); loadInfo();
-    }
-
-    async function unlock() {
-      const tx = await contract.unlockAllFrozenTokens(); await tx.wait(); alert("🔓 تم فك الرموز!");
-    }
-
-    async function startTrade() {
-      const tx = await contract.startTrading(); await tx.wait(); alert("🚀 تم بدء التداول!");
-    }
-
-    async function upgrade() {
-      const newAddr = document.getElementById("newImplementation").value;
-      const tx = await contract.upgradeToAndCall(newAddr, "0x");
-      await tx.wait(); alert("✅ تمت الترقية بنجاح!");
-    }
-
-    async function checkOther() {
-      const tokenAddr = document.getElementById("tokenAddress").value;
-      const erc20 = new ethers.Contract(tokenAddr, [{"inputs":[{"internalType":"address","name":"account","type":"address"}],"name":"balanceOf","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"}], provider);
-      const bal = await erc20.balanceOf(contractAddress);
-      document.getElementById("otherTokenBal").innerText = ethers.utils.formatUnits(bal, 18);
-    }
-
-    document.getElementById("connectBtn").onclick = connectWallet;
-    document.getElementById("burnBtn").onclick = burn;
-    document.getElementById("transferBtn").onclick = transfer;
-    document.getElementById("unlockBtn").onclick = unlock;
-    document.getElementById("startBtn").onclick = startTrade;
-    document.getElementById("upgradeBtn").onclick = upgrade;
-    document.getElementById("checkOther").onclick = checkOther;
-  </script>
-</body>
-</html>
+    // مثال: قراءة اسم العملة
+    const tokenName = await contract.name();
+    console.log("🔖 اسم العملة:", tokenName);
+  }
+</script>
